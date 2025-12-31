@@ -32,7 +32,7 @@ internal class Program
             var response = await processor.ProcessUserMessageAsync(command);
             if (response == "end")
             {
-                Console.WriteLine("Thanks for chatting with me!");
+                Console.WriteLine("Thanks for chatting with me, goodbye!");
                 break;
             }
             else
