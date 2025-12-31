@@ -4,6 +4,7 @@ using AgentAgnes;
 using System.Net;
 using Zaria.AI;
 using Zaria.AI.Chat;
+using Zaria.Core;
 
 [assembly: AIPluginAttribute(
     "File Processing Plugin",
@@ -23,18 +24,59 @@ internal class Program
         };
         await processor.InitializeAsync();
 
-        var response = await processor.ProcessUserMessageAsync("What time is it");
-        Console.WriteLine($"Your Answer is: {response}");
-        Console.Read();
+        while (true)
+        {
+            Console.Write("ai> ");
+            var command = Console.ReadLine();
+
+            var response = await processor.ProcessUserMessageAsync(command);
+            if (response == "end")
+            {
+                Console.WriteLine("Thanks for chatting with me!");
+                break;
+            }
+            else
+                Console.WriteLine(response.Deserialize<AgnesMessage>().Message);
+
+        }
+
     }
 }
 
 public class SampleAgent : AIAgent
 {
+    
+
+    [Skill("Call when you need to end the application")]
+    public SkillResponse EndApplication()
+    {
+        return Success("end", false);
+    }
+
+    [Skill("Call when you need to know the president of the United States")]
+    public SkillResponse GetPresident()
+    {
+        return Success("Donald J. Trump");
+    }
+
     [Skill("Call when you need to know the current date or time")]
     public SkillResponse GetDateTime()
     {
-        var date = DateTime.Now;
-        return Success($"{date}",false);
+        return Success($"{DateTime.Now}");
     }
+
+    [Skill("Call whenever you need to get the count of messages that have been received")]
+    public SkillResponse CountMessages(
+           [Parameter("Represents the time period to search")]
+            string time_period
+       )
+    {
+
+        var sandbox_path = Path.Combine(Environment.CurrentDirectory, "wwwroot/aisandbox");
+        var summary_files = Directory.GetFiles(sandbox_path);
+        var summary_count = summary_files.Count();
+        return Success(summary_count);
+
+    }
+
 }
