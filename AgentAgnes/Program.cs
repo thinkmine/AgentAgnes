@@ -17,18 +17,32 @@ internal class Program
 {
     async private static Task Main(string[] args)
     {
-        var processor = new AIChatProcessor(AgentSettings.ai_endpoint, AgentSettings.ai_access_key, AgentSettings.ai_deployment_name)
-        {
-            MaxTokens = 800,
-            Temperature = 0
-        };
+        int chat_index = 0;
+        var processor = new AIChatProcessor(AgentSettings.AIEndpoint, AgentSettings.AIAccessKey, AgentSettings.AIDeploymentName[chat_index]);
         await processor.InitializeAsync();
 
         while (true)
         {
-            Console.Write("ai> ");
+            Console.BackgroundColor = ConsoleColor.Yellow;
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.Write($"{AgentSettings.AIDeploymentName[chat_index]}");
+            Console.ResetColor();
+            Console.Write(" > ");
+
             var command = Console.ReadLine();
 
+            if (command == "change")
+            {
+                chat_index++;
+                if (chat_index > 2)
+                    chat_index = 0;
+
+                processor = new AIChatProcessor(AgentSettings.AIEndpoint, AgentSettings.AIAccessKey, AgentSettings.AIDeploymentName[chat_index]);
+                await processor.InitializeAsync();
+                continue;
+            }
+
+            var now = DateTime.Now;
             var response = await processor.ProcessUserMessageAsync(command);
             if (response == "end")
             {
@@ -36,7 +50,19 @@ internal class Program
                 break;
             }
             else
+            {
+                Console.WriteLine();
                 Console.WriteLine(response.Deserialize<AgnesMessage>().Message);
+                //Console.BackgroundColor = ConsoleColor.DarkGreen;
+                //Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"(This response took {(DateTime.Now - now).TotalSeconds.Round(1)} seconds)");
+
+                
+                Console.ResetColor();
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine();
+            }
 
         }
 
