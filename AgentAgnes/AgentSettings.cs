@@ -13,7 +13,7 @@ public  class AgentSettings
     
     public static string AIEndpoint { get; } = "https://thinkmine-aitests.openai.azure.com";
     public static string AIAccessKey { get;  } = "EUda8yFXDMBzFABbKZow34FqmHMmf5jnjurxj603MIrv5HWiJPgQJQQJ99CAACHYHv6XJ3w3AAAAACOG1Gdv";
-    public static string[] AIDeploymentName { get; } = ["gpt-5.2-chat", "DeepSeek-V3.2", "grok-3"];
+    public static string[] AIDeploymentName { get; } = ["gpt-5.2-chat", "DeepSeek-V3.1", "DeepSeek-V3.2", "grok-3"];
 }
 
 public class AgnesMessage
