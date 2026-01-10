@@ -6,12 +6,12 @@ namespace AgentAgnes;
 
 public  class AgentSettings
 {
-    public static string AIEndpoint { get; set; } = "https://thinkmine-ai-demos.openai.azure.com/";
-    public static string AIAccessKey { get; set; } = "a57bf876732a4da7a0870c84373848f2";
-    public static string AIDeploymentName { get; set; } = "gpt-4o2";
+    public static string AIEndpoint { get; set; } = "https://thinkmine-aitests.openai.azure.com/";
+    public static string AIAccessKey { get; set; } = "EUda8yFXDMBzFABbKZow34FqmHMmf5jnjurxj603MIrv5HWiJPgQJQQJ99CAACHYHv6XJ3w3AAAAACOG1Gdv";
+    public static string[] AIDeploymentName { get; set; } = ["gpt-5.2-chat","DeepSeek-V3.2","grok-3"];
 }
 
 public class AgnesMessage
 {
-    public string Message { get; set; }
+    public string Message { get; set; } = "";
 }
