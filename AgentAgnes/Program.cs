@@ -3,6 +3,7 @@
 using AgentAgnes;
 using OpenAI.Images;
 using System.Net;
+using System.Net.Http.Headers;
 using Zaria.AI;
 using Zaria.AI.Chat;
 using Zaria.Core;
@@ -39,22 +40,57 @@ internal class Program
         Console.Write(message);
         Console.ResetColor();
     }
+
+    static void WriteRed(string message)
+    {
+        Console.BackgroundColor = ConsoleColor.Red;
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.Write(message);
+        Console.ResetColor();
+    }
+
+    static string PromptSecret(string message)
+    {
+        WriteRed($"{message} ");
+        WriteGray(" : ");
+        Write(" ");
+        var response = Console.ReadLine() ?? "";
+        return response;
+    }
+
+    static string Prompt(string message)
+    {
+        WriteYellow($"{message} ");
+        WriteGray(" > ");
+        Write(" ");
+        var response = Console.ReadLine() ?? "";
+        return response;
+    }
+
     async private static Task Main(string[] args)
     {
+       
         int model_index = 0;
-        var processor = new AIChatProcessor(AgentSettings.AIEndpoint, AgentSettings.AIAccessKey, AgentSettings.AIDeploymentName[model_index]);
-        await processor.InitializeAsync();
+        AIChatProcessor? processor = null;
 
         while (true)
         {
-            Console.BackgroundColor = ConsoleColor.Yellow;
-            Console.ForegroundColor = ConsoleColor.Black;
-            WriteYellow($"{AgentSettings.AIDeploymentName[model_index]} ");
-            
-            WriteGray(" > ");
-            Write(" ");
+            if (AgentAgnes.AgentSettings.AIAccessKey.IsNull)
+            {
+                try
+                {
+                    AgentSettings.AIAccessKey = PromptSecret("Enter the secret");
+                    processor = new AIChatProcessor(AgentSettings.AIEndpoint, AgentSettings.AIAccessKey, AgentSettings.AIDeploymentName[model_index]);
+                    await processor.InitializeAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Could not connect to AI environment");
+                    break;
+                }
+            }
 
-            var command = Console.ReadLine();
+            var command = Prompt($"{AgentSettings.AIDeploymentName[model_index]} ");
 
             if (command == "change")
             {
@@ -66,22 +102,25 @@ internal class Program
                 await processor.InitializeAsync();
                 continue;
             }
-
-            var start = DateTime.Now;
-            var response = await processor.ProcessUserMessageAsync(command);
-            if (response == "end")
-            {
-                Console.WriteLine("Thanks for chatting with me, goodbye!");
-                break;
-            }
             else
             {
-                
-                Console.WriteLine();
-                Console.WriteLine(response.Deserialize<AgnesMessage>().Message);
-                Console.WriteLine($"(This response tool {(DateTime.Now - start).TotalSeconds.Round(1)} seconds)");
-                Console.ResetColor();
-                Console.WriteLine();
+
+                var start = DateTime.Now;
+                var response = await processor.ProcessUserMessageAsync(command);
+                if (response == "end")
+                {
+                    Console.WriteLine("Thanks for chatting with me, goodbye!");
+                    break;
+                }
+                else
+                {
+
+                    Console.WriteLine();
+                    Console.WriteLine(response.Deserialize<AgnesMessage>().Message);
+                    Console.WriteLine($"(This response tool {(DateTime.Now - start).TotalSeconds.Round(1)} seconds)");
+                    Console.ResetColor();
+                    Console.WriteLine();
+                }
             }
 
         }

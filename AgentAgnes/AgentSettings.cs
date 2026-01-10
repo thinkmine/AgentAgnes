@@ -7,7 +7,7 @@ namespace AgentAgnes;
 public  class AgentSettings
 {
     public static string AIEndpoint { get; set; } = "https://thinkmine-aitests.openai.azure.com/";
-    public static string AIAccessKey { get; set; } = "EUda8yFXDMBzFABbKZow34FqmHMmf5jnjurxj603MIrv5HWiJPgQJQQJ99CAACHYHv6XJ3w3AAAAACOG1Gdv";
+    public static string AIAccessKey { get; set; } = "";
     public static string[] AIDeploymentName { get; set; } = ["gpt-5.2-chat","DeepSeek-V3.2","grok-3"];
 }
 
