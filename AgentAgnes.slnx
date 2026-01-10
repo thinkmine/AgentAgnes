@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="AgentAgnes/AgentAgnes.csproj" />
+  <Project Path="AgnesMCP/AgnesMCP.csproj" Id="35120357-781d-480e-bd65-4d6f72ad0bf9" />
 </Solution>
