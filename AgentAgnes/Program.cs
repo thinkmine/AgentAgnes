@@ -1,7 +1,9 @@
 ﻿
 
 using AgentAgnes;
+using OpenAI.Images;
 using System.Net;
+using System.Net.Http.Headers;
 using Zaria.AI;
 using Zaria.AI.Chat;
 using Zaria.Core;
@@ -15,53 +17,110 @@ using Zaria.Core;
 
 internal class Program
 {
+    static void Write(string message)
+    {
+        Console.ResetColor();
+        Console.BackgroundColor = ConsoleColor.Black;
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.Write(message);
+        Console.ResetColor();
+    }
+
+    static void WriteYellow(string message)
+    {
+        Console.BackgroundColor = ConsoleColor.Yellow;
+        Console.ForegroundColor = ConsoleColor.Black;
+        Console.Write(message);
+        Console.ResetColor();
+    }
+    static void WriteGray(string message)
+    {
+        Console.BackgroundColor = ConsoleColor.DarkGray;
+        Console.ForegroundColor = ConsoleColor.Black;
+        Console.Write(message);
+        Console.ResetColor();
+    }
+
+    static void WriteRed(string message)
+    {
+        Console.BackgroundColor = ConsoleColor.Red;
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.Write(message);
+        Console.ResetColor();
+    }
+
+    static string PromptSecret(string message)
+    {
+        WriteRed($"{message} ");
+        WriteGray(" : ");
+        Write(" ");
+        var response = Console.ReadLine() ?? "";
+        return response;
+    }
+
+    static string Prompt(string message)
+    {
+        WriteYellow($"{message} ");
+        WriteGray(" > ");
+        Write(" ");
+        var response = Console.ReadLine() ?? "";
+        return response;
+    }
+
     async private static Task Main(string[] args)
     {
-        int chat_index = 0;
-        var processor = new AIChatProcessor(AgentSettings.AIEndpoint, AgentSettings.AIAccessKey, AgentSettings.AIDeploymentName[chat_index]);
-        await processor.InitializeAsync();
+       
+        int model_index = 0;
+        AIChatProcessor? processor = null;
 
         while (true)
         {
-            Console.BackgroundColor = ConsoleColor.Yellow;
-            Console.ForegroundColor = ConsoleColor.Black;
-            Console.Write($"{AgentSettings.AIDeploymentName[chat_index]}");
-            Console.ResetColor();
-            Console.Write(" > ");
+            if (AgentAgnes.AgentSettings.AIAccessKey.IsNull)
+            {
+                try
+                {
+                    AgentSettings.AIAccessKey = PromptSecret("Enter the secret");
+                    processor = new AIChatProcessor(AgentSettings.AIEndpoint, AgentSettings.AIAccessKey, AgentSettings.AIDeploymentName[model_index]);
+                    await processor.InitializeAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Could not connect to AI environment");
+                    break;
+                }
+            }
 
-            var command = Console.ReadLine();
+            var command = Prompt($"{AgentSettings.AIDeploymentName[model_index]} ");
 
             if (command == "change")
             {
-                chat_index++;
-                if (chat_index > 2)
-                    chat_index = 0;
+                model_index++;
+                if (model_index > 2)
+                    model_index = 0;
 
-                processor = new AIChatProcessor(AgentSettings.AIEndpoint, AgentSettings.AIAccessKey, AgentSettings.AIDeploymentName[chat_index]);
+                processor = new AIChatProcessor(AgentSettings.AIEndpoint, AgentSettings.AIAccessKey, AgentSettings.AIDeploymentName[model_index]);
                 await processor.InitializeAsync();
                 continue;
             }
-
-            var now = DateTime.Now;
-            var response = await processor.ProcessUserMessageAsync(command);
-            if (response == "end")
-            {
-                Console.WriteLine("Thanks for chatting with me, goodbye!");
-                break;
-            }
             else
             {
-                Console.WriteLine();
-                Console.WriteLine(response.Deserialize<AgnesMessage>().Message);
-                //Console.BackgroundColor = ConsoleColor.DarkGreen;
-                //Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine($"(This response took {(DateTime.Now - now).TotalSeconds.Round(1)} seconds)");
 
-                
-                Console.ResetColor();
-                Console.BackgroundColor = ConsoleColor.Black;
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine();
+                var start = DateTime.Now;
+                var response = await processor.ProcessUserMessageAsync(command);
+                if (response == "end")
+                {
+                    Console.WriteLine("Thanks for chatting with me, goodbye!");
+                    break;
+                }
+                else
+                {
+
+                    Console.WriteLine();
+                    Console.WriteLine(response.Deserialize<AgnesMessage>().Message);
+                    Console.WriteLine($"(This response tool {(DateTime.Now - start).TotalSeconds.Round(1)} seconds)");
+                    Console.ResetColor();
+                    Console.WriteLine();
+                }
             }
 
         }
@@ -82,7 +141,7 @@ public class SampleAgent : AIAgent
     [Skill("Call when you need to know the president of the United States")]
     public SkillResponse GetPresident()
     {
-        return Success("Donald J. Trump");
+        return Success("Kamala Harris");
     }
 
     [Skill("Call when you need to know the current date or time")]
