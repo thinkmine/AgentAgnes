@@ -17,6 +17,7 @@ using Zaria.Core;
 
 internal class Program
 {
+    #region Helpers
     static void Write(string message)
     {
         Console.ResetColor();
@@ -67,15 +68,17 @@ internal class Program
         return response;
     }
 
+    #endregion
+
     async private static Task Main(string[] args)
     {
-       
+
         int model_index = 0;
         AIChatProcessor? processor = null;
 
         while (true)
         {
-            if (AgentAgnes.AgentSettings.AIAccessKey.IsNull)
+            if (AgentSettings.AIAccessKey.IsNull)
             {
                 try
                 {
@@ -88,6 +91,11 @@ internal class Program
                     Console.WriteLine("Could not connect to AI environment");
                     break;
                 }
+            }
+            else
+            {
+                processor = new AIChatProcessor(AgentSettings.AIEndpoint, AgentSettings.AIAccessKey, AgentSettings.AIDeploymentName[model_index]);
+                await processor.InitializeAsync();
             }
 
             var command = Prompt($"{AgentSettings.AIDeploymentName[model_index]} ");
@@ -114,7 +122,6 @@ internal class Program
                 }
                 else
                 {
-
                     Console.WriteLine();
                     Console.WriteLine(response.Deserialize<AgnesMessage>().Message);
                     Console.WriteLine($"(This response tool {(DateTime.Now - start).TotalSeconds.Round(1)} seconds)");
@@ -130,7 +137,7 @@ internal class Program
 
 public class SampleAgent : AIAgent
 {
-    
+
 
     [Skill("Call when you need to end the application")]
     public SkillResponse EndApplication()
