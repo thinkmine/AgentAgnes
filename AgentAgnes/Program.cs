@@ -17,7 +17,7 @@ internal class Program
 {
     async private static Task Main(string[] args)
     {
-        var processor = new AIChatProcessor(AgentSettings.ai_endpoint, AgentSettings.ai_access_key, AgentSettings.ai_deployment_name)
+        var processor = new AIChatProcessor(AgentSettings.AIEndpoint, AgentSettings.AIAccessKey, AgentSettings.AIDeploymentName)
         {
             MaxTokens = 800,
             Temperature = 0
